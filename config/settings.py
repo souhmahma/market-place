@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'accounts',
     'shops',
     'products',
+    'orders',
 ]
 
 MIDDLEWARE = [
@@ -137,3 +138,13 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
 }
+
+# config/settings.py
+import stripe
+from decouple import config
+
+STRIPE_SECRET_KEY    = config('STRIPE_SECRET_KEY')
+STRIPE_WEBHOOK_SECRET = config('STRIPE_WEBHOOK_SECRET')
+COMMISSION_RATE      = float(config('COMMISSION_RATE', default=0.10))
+
+stripe.api_key = STRIPE_SECRET_KEY
