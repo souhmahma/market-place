@@ -1,6 +1,7 @@
 from django.db import models
 from accounts.models import User
 from products.models import Product
+from decimal import Decimal  
 
 class Order(models.Model):
     class Status(models.TextChoices):
@@ -22,7 +23,7 @@ class Order(models.Model):
     def calculate_totals(self):
         from django.conf import settings
         self.total_amount      = sum(item.subtotal() for item in self.items.all())
-        self.commission_amount = self.total_amount * settings.COMMISSION_RATE
+        self.commission_amount = self.total_amount * Decimal(str(settings.COMMISSION_RATE))  # ← fix
         self.save()
 
     def __str__(self):

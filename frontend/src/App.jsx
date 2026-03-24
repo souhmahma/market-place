@@ -16,6 +16,8 @@ import ModerateShops    from './pages/moderator/ModerateShops'
 import ModerateProducts from './pages/moderator/ModerateProducts'
 import AdminUsers       from './pages/admin/AdminUsers'
 import Profile from './pages/Profile'
+import Success from './pages/Success'
+import Cancel  from './pages/Cancel'
 
 export default function App() {
   return (
@@ -92,6 +94,8 @@ export default function App() {
     <Profile />
   </ProtectedRoute>
 } />
+<Route path="/success" element={<Success />} />
+<Route path="/cancel"  element={<Cancel />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
