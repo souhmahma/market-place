@@ -41,3 +41,11 @@ class ShopModerationView(generics.UpdateAPIView):
             send_shop_approved_email.delay(shop.id)
         elif shop.status == 'rejected':
             send_shop_rejected_email.delay(shop.id)
+
+class PendingShopListView(generics.ListAPIView):
+    """Modérateur voit toutes les boutiques en attente"""
+    serializer_class   = ShopSerializer
+    permission_classes = [IsModerator]
+
+    def get_queryset(self):
+        return Shop.objects.filter(status='pending')

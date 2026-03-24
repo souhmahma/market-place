@@ -47,3 +47,11 @@ class CategoryListView(generics.ListCreateAPIView):
     serializer_class   = CategorySerializer
     permission_classes = [permissions.AllowAny]
     queryset           = Category.objects.all()
+
+class PendingProductListView(generics.ListAPIView):
+    """Modérateur voit tous les produits en attente"""
+    serializer_class   = ProductSerializer
+    permission_classes = [IsModerator]
+
+    def get_queryset(self):
+        return Product.objects.filter(status='pending')
