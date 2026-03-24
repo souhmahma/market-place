@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from .models import Order, OrderItem, Cart, CartItem
 from .serializers import OrderSerializer, CartSerializer, CartItemSerializer
 from accounts.permissions import IsAdmin
+from orders.tasks import send_shop_approved_email, send_shop_rejected_email
 
 class CartView(APIView):
     """Le customer gère son panier"""
@@ -135,7 +136,7 @@ class StripeWebhookView(APIView):
                 status            = Order.Status.PAID,
                 stripe_payment_id = session['payment_intent']
             )
-
+            send_order_confirmation_email.delay(order_id)
         return Response({"status": "ok"})
 
 class OrderListView(generics.ListAPIView):

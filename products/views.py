@@ -2,7 +2,7 @@ from rest_framework import generics, permissions
 from .models import Product, Category
 from .serializers import ProductSerializer, CategorySerializer, ProductStatusSerializer
 from accounts.permissions import IsVendor, IsModerator
-
+from orders.tasks import send_product_approved_email, send_low_stock_alert
 class ProductCreateView(generics.CreateAPIView):
     """Vendeur ajoute un produit à sa boutique"""
     serializer_class   = ProductSerializer
@@ -34,6 +34,13 @@ class ProductModerationView(generics.UpdateAPIView):
     serializer_class   = ProductStatusSerializer
     permission_classes = [IsModerator]
     queryset           = Product.objects.all()
+    def perform_update(self, serializer):
+        product = serializer.save()
+        # Envoyer email + vérifier stock
+        if product.status == 'approved':
+            send_product_approved_email.delay(product.id)
+        if product.stock < 5:
+            send_low_stock_alert.delay(product.id)
 
 class CategoryListView(generics.ListCreateAPIView):
     """Tout le monde voit les catégories, admin peut en créer"""

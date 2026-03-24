@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'shops',
     'products',
     'orders',
+    'django_celery_results'
 ]
 
 MIDDLEWARE = [
@@ -148,3 +149,19 @@ STRIPE_WEBHOOK_SECRET = config('STRIPE_WEBHOOK_SECRET')
 COMMISSION_RATE      = float(config('COMMISSION_RATE', default=0.10))
 
 stripe.api_key = STRIPE_SECRET_KEY
+
+# Celery
+CELERY_BROKER_URL        = config('REDIS_URL')
+CELERY_RESULT_BACKEND    = config('REDIS_URL')
+CELERY_ACCEPT_CONTENT    = ['json']
+CELERY_TASK_SERIALIZER   = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+
+# Email
+EMAIL_BACKEND       = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST          = config('EMAIL_HOST')
+EMAIL_PORT          = config('EMAIL_PORT', cast=int)
+EMAIL_USE_TLS       = True
+EMAIL_HOST_USER     = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL  = config('EMAIL_HOST_USER')

@@ -34,3 +34,10 @@ class ShopModerationView(generics.UpdateAPIView):
     serializer_class   = ShopStatusSerializer
     permission_classes = [IsModerator]
     queryset           = Shop.objects.all()
+    def perform_update(self, serializer):
+        shop = serializer.save()
+        #  Envoyer email selon le statut
+        if shop.status == 'approved':
+            send_shop_approved_email.delay(shop.id)
+        elif shop.status == 'rejected':
+            send_shop_rejected_email.delay(shop.id)
