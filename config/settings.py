@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'shops',
     'products',
     'orders',
-    'django_celery_results'
+    'django_celery_results',
+    'dashboard'
 ]
 
 MIDDLEWARE = [
