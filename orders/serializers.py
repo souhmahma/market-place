@@ -26,15 +26,22 @@ class OrderSerializer(serializers.ModelSerializer):
         read_only_fields = ['status', 'total_amount', 'commission_amount', 'stripe_payment_id']
 
 class CartItemSerializer(serializers.ModelSerializer):
-    product_name = serializers.CharField(source='product.name', read_only=True)
-    subtotal     = serializers.SerializerMethodField()
+    product_name  = serializers.CharField(source='product.name', read_only=True)
+    product_image = serializers.SerializerMethodField()  # 🆕
+    subtotal      = serializers.SerializerMethodField()
 
     class Meta:
         model  = CartItem
-        fields = ['id', 'product', 'product_name', 'quantity', 'subtotal']
+        fields = ['id', 'product', 'product_name', 'product_image', 'quantity', 'subtotal']
 
     def get_subtotal(self, obj):
         return obj.subtotal()
+
+    def get_product_image(self, obj):  # 🆕
+        request = self.context.get('request')
+        if obj.product.image and request:
+            return request.build_absolute_uri(obj.product.image.url)
+        return None
 
 class CartSerializer(serializers.ModelSerializer):
     cart_items = CartItemSerializer(many=True, read_only=True)

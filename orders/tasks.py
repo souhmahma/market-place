@@ -107,3 +107,90 @@ Pensez à réapprovisionner.
         recipient_list = [product.shop.owner.email],
     )
     return f"Alerte stock envoyée pour produit #{product_id}"
+
+@shared_task
+def send_moderator_new_shop_email(shop_id):
+    """Email envoyé aux modérateurs quand une nouvelle boutique est en attente"""
+    from shops.models import Shop
+    from accounts.models import User
+
+    shop = Shop.objects.get(id=shop_id)
+
+    # Récupère tous les modérateurs
+    moderators = User.objects.filter(role='moderator')
+    emails = [m.email for m in moderators if m.email]
+
+    if not emails:
+        return "Aucun modérateur trouvé"
+
+    send_mail(
+        subject = f"🏪 Nouvelle boutique en attente — {shop.name}",
+        message = f"""
+Bonjour,
+
+Une nouvelle boutique est en attente de validation :
+
+Nom      : {shop.name}
+Vendeur  : {shop.owner.username}
+Email    : {shop.owner.email}
+Description : {shop.description}
+
+Connectez-vous pour approuver ou rejeter cette boutique.
+        """,
+        from_email     = settings.DEFAULT_FROM_EMAIL,
+        recipient_list = emails,
+    )
+    return f"Email modérateur envoyé pour boutique #{shop_id}"
+
+
+@shared_task
+def send_moderator_new_product_email(product_id):
+    """Email envoyé aux modérateurs quand un nouveau produit est en attente"""
+    from products.models import Product
+    from accounts.models import User
+
+    product    = Product.objects.get(id=product_id)
+    moderators = User.objects.filter(role='moderator')
+    emails     = [m.email for m in moderators if m.email]
+
+    if not emails:
+        return "Aucun modérateur trouvé"
+
+    send_mail(
+        subject = f"📦 Nouveau produit en attente — {product.name}",
+        message = f"""
+Bonjour,
+
+Un nouveau produit est en attente de validation :
+
+Produit  : {product.name}
+Boutique : {product.shop.name}
+Prix     : {product.price}€
+Stock    : {product.stock}
+Description : {product.description}
+
+Connectez-vous pour approuver ou rejeter ce produit.
+        """,
+        from_email     = settings.DEFAULT_FROM_EMAIL,
+        recipient_list = emails,
+    )
+    return f"Email modérateur envoyé pour produit #{product_id}"
+
+@shared_task
+def send_product_rejected_email(product_id):
+    """Email envoyé au vendeur quand son produit est rejeté"""
+    from products.models import Product
+    product = Product.objects.get(id=product_id)
+
+    send_mail(
+        subject = f"Votre produit '{product.name}' a été rejeté",
+        message = f"""
+Bonjour {product.shop.owner.username},
+
+Malheureusement, votre produit "{product.name}" n'a pas été approuvé.
+Veuillez contacter le support pour plus d'informations.
+        """,
+        from_email     = settings.DEFAULT_FROM_EMAIL,
+        recipient_list = [product.shop.owner.email],
+    )
+    return f"Email rejet envoyé pour produit #{product_id}"

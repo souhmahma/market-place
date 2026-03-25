@@ -1,12 +1,23 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { getProducts } from '../api/products'
 import ProductCard from '../components/ProductCard'
+import useAuth from '../hooks/useAuth'
 
 export default function Products() {
+  const { user }                  = useAuth()
+  const navigate                  = useNavigate()
   const [products, setProducts]   = useState([])
   const [loading, setLoading]     = useState(true)
   const [search, setSearch]       = useState('')
   const [filtered, setFiltered]   = useState([])
+
+  // Bloquer vendeur/admin/modérateur
+  useEffect(() => {
+    if (user && ['vendor', 'admin', 'moderator'].includes(user.role)) {
+      navigate(`/dashboard/${user.role}`)
+    }
+  }, [user])
 
   useEffect(() => {
     getProducts()
@@ -17,7 +28,6 @@ export default function Products() {
       .finally(() => setLoading(false))
   }, [])
 
-  // Recherche côté client
   useEffect(() => {
     const results = products.filter((p) =>
       p.name.toLowerCase().includes(search.toLowerCase()) ||

@@ -3,15 +3,19 @@ from rest_framework.response import Response
 from .models import Shop
 from .serializers import ShopSerializer, ShopStatusSerializer
 from accounts.permissions import IsVendor, IsModerator
-
+from orders.tasks import send_moderator_new_shop_email  
+# shops/views.py
 class ShopCreateView(generics.CreateAPIView):
-    """Vendeur crée sa boutique"""
     serializer_class   = ShopSerializer
     permission_classes = [IsVendor]
 
     def perform_create(self, serializer):
-        # On assigne automatiquement le vendeur connecté comme owner
-        serializer.save(owner=self.request.user)
+        # Vérifie si le vendeur a déjà une boutique
+        if hasattr(self.request.user, 'shop'):
+            from rest_framework.exceptions import ValidationError
+            raise ValidationError("Vous avez déjà une boutique.")
+        shop = serializer.save(owner=self.request.user)
+        send_moderator_new_shop_email.delay(shop.id)
 
 class ShopDetailView(generics.RetrieveUpdateAPIView):
     """Vendeur consulte et modifie SA boutique"""

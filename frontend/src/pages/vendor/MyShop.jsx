@@ -137,24 +137,36 @@ export default function MyShop() {
 
       <div className="space-y-3">
         {products.map((product) => (
-          <div key={product.id} className="bg-white rounded-xl shadow p-4 flex justify-between items-center">
-            <div>
-              <p className="font-semibold">{product.name}</p>
-              <p className="text-gray-500 text-sm">{product.price}€ — Stock : {product.stock}</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className={`px-2 py-1 rounded text-xs ${STATUS_COLORS[product.status]}`}>
-                {product.status}
-              </span>
-              <button
-                onClick={() => handleDelete(product.id)}
-                className="text-red-400 hover:text-red-600 text-sm"
-              >
-                Supprimer
-              </button>
-            </div>
-          </div>
-        ))}
+  <div key={product.id} className="bg-white rounded-xl shadow p-4 flex items-center gap-4">
+    {/* Image */}
+    {product.image_url ? (
+      <img
+        src={product.image_url}
+        alt={product.name}
+        className="w-16 h-16 rounded-lg object-cover"
+      />
+    ) : (
+      <div className="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center text-2xl">
+        📦
+      </div>
+    )}
+    <div className="flex-1">
+      <p className="font-semibold">{product.name}</p>
+      <p className="text-gray-500 text-sm">{product.price}€ — Stock : {product.stock}</p>
+    </div>
+    <div className="flex items-center gap-3">
+      <span className={`px-2 py-1 rounded text-xs ${STATUS_COLORS[product.status]}`}>
+        {product.status}
+      </span>
+      <button
+        onClick={() => handleDelete(product.id)}
+        className="text-red-400 hover:text-red-600 text-sm"
+      >
+        Supprimer
+      </button>
+    </div>
+  </div>
+))}
       </div>
     </div>
   )

@@ -3,7 +3,7 @@ import useAuth from '../hooks/useAuth'
 import { updateProfile, updateAvatar } from '../api/auth'
 
 export default function Profile() {
-  const { user, login } = useAuth()
+  const { user, updateUser } = useAuth()
   const [form, setForm] = useState({
     username : user?.username || '',
     email    : user?.email    || '',
@@ -18,19 +18,23 @@ export default function Profile() {
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
-    setSuccess('')
-    try {
-      await updateProfile(form)
-      setSuccess('Profil mis à jour !')
-    } catch (err) {
-      setError('Erreur lors de la mise à jour')
-    } finally {
-      setLoading(false)
-    }
+  e.preventDefault()
+  setLoading(true)
+  setError('')
+  setSuccess('')
+
+  try {
+    const updatedUser = await updateProfile(form)
+
+    updateUser(updatedUser.data)
+
+    setSuccess('Profil mis à jour !')
+  } catch (err) {
+    setError('Erreur lors de la mise à jour')
+  } finally {
+    setLoading(false)
   }
+}
 
   const handleAvatarChange = async (e) => {
     const file = e.target.files[0]

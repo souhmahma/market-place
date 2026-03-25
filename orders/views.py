@@ -15,28 +15,37 @@ class CartView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        # Crée le panier s'il n'existe pas encore
         cart, _ = Cart.objects.get_or_create(customer=request.user)
-        serializer = CartSerializer(cart)
+        serializer = CartSerializer(cart, context={'request': request})  # 🆕 context
         return Response(serializer.data)
 
     def post(self, request):
         """Ajouter un produit au panier"""
-        cart, _     = Cart.objects.get_or_create(customer=request.user)
-        product_id  = request.data.get('product_id')
-        quantity    = request.data.get('quantity', 1)
+        cart, _    = Cart.objects.get_or_create(customer=request.user)
+        product_id = request.data.get('product_id')
+        quantity   = int(request.data.get('quantity', 1))
+
+        # Vérifier le stock disponible
+        from products.models import Product
+        try:
+            product = Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            return Response({"error": "Produit introuvable"}, status=404)
 
         cart_item, created = CartItem.objects.get_or_create(
-            cart=cart,
-            product_id=product_id,
-            defaults={'quantity': quantity}
+            cart       = cart,
+            product_id = product_id,
+            defaults   = {'quantity': quantity}
         )
+
         if not created:
-            # Produit déjà dans le panier → on augmente la quantité
-            cart_item.quantity += int(quantity)
+            # Calcule la nouvelle quantité sans dépasser le stock
+            new_quantity = cart_item.quantity + quantity
+            cart_item.quantity = min(new_quantity, product.stock)  # ← fix
             cart_item.save()
 
-        return Response(CartSerializer(cart).data, status=status.HTTP_200_OK)
+        serializer = CartSerializer(cart, context={'request': request})
+        return Response(serializer.data, status=200)
 
     def delete(self, request):
         """Vider le panier"""
@@ -128,14 +137,27 @@ class StripeWebhookView(APIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         # Paiement confirmé → on met à jour la commande
+        # Dans StripeWebhookView — après mise à jour du statut
         if event['type'] == 'checkout.session.completed':
             session  = event['data']['object']
-            order_id = session['metadata']['order_id']
-            Order.objects.filter(id=order_id).update(
-                status            = Order.Status.PAID,
-                stripe_payment_id = session['payment_intent']
-            )
-            send_order_confirmation_email.delay(order_id)
+            order_id = session['metadata'].get('order_id')
+
+            if not order_id:
+                return Response(status=400)
+
+            order = Order.objects.get(id=order_id)
+            order.status            = Order.Status.PAID
+            order.stripe_payment_id = session.get('payment_intent', '')
+            order.save()
+
+            # 🆕 Mettre à jour le stock de chaque produit
+            for item in order.items.all():
+                product = item.product
+                product.stock = max(0, product.stock - item.quantity)
+                product.save()
+
+            send_order_confirmation_email.delay(int(order_id))
+
         return Response({"status": "ok"})
 
 class OrderListView(generics.ListAPIView):

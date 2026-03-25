@@ -1,37 +1,80 @@
-import { Link } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import useAuth from '../hooks/useAuth'
 
 export default function Navbar() {
   const { user, logout } = useAuth()
 
+  // 🔥 style commun
+  const linkClass = ({ isActive }) =>
+    isActive
+      ? "bg-blue-700 text-white px-4 py-1 rounded-lg"
+      : "bg-gray-600 text-white px-4 py-1 rounded-lg hover:bg-blue-700 transition"
+
+  const textLinkClass = ({ isActive }) =>
+    isActive
+      ? "text-blue-700 font-semibold"
+      : "text-gray-600 hover:text-blue-600 transition"
+
   return (
     <nav className="bg-white shadow-sm px-6 py-4 flex items-center justify-between">
-      <Link to="/" className="text-xl font-bold text-blue-600">Marketplace</Link>
+      
+      <NavLink to="/" className="text-xl font-bold text-blue-600">
+        Marketplace
+      </NavLink>
 
       <div className="flex items-center gap-4 text-sm">
-        <Link to="/products" className="text-gray-600 hover:text-blue-600">Produits</Link>
 
+        {/* Produits */}
+        {(!user || user.role === 'customer') && (
+  <NavLink to="/products" className={linkClass}>
+    Produits
+  </NavLink>
+)}
+
+        {/* CUSTOMER */}
         {user?.role === 'customer' && <>
-          <Link to="/cart"   className="text-gray-600 hover:text-blue-600">Panier</Link>
-          <Link to="/orders" className="text-gray-600 hover:text-blue-600">Commandes</Link>
+          <NavLink to="/cart" className={linkClass}>
+            Panier
+          </NavLink>
+          <NavLink to="/orders" className={linkClass}>
+            Commandes
+          </NavLink>
         </>}
 
+        {/* VENDOR */}
         {user?.role === 'vendor' && <>
-          <Link to="/vendor/shop"         className="text-gray-600 hover:text-blue-600">Ma boutique</Link>
-          <Link to="/dashboard/vendor"    className="text-gray-600 hover:text-blue-600">Dashboard</Link>
+          <NavLink to="/vendor/shop" className={linkClass}>
+            Ma boutique
+          </NavLink>
+          <NavLink to="/dashboard/vendor" className={linkClass}>
+            Dashboard
+          </NavLink>
         </>}
 
+        {/* MODERATOR */}
         {user?.role === 'moderator' && <>
-          <Link to="/moderator/shops"    className="text-gray-600 hover:text-blue-600">Boutiques</Link>
-          <Link to="/moderator/products" className="text-gray-600 hover:text-blue-600">Produits</Link>
-          <Link to="/dashboard/moderator" className="text-gray-600 hover:text-blue-600">Dashboard</Link>
+          <NavLink to="/moderator/shops" className={linkClass}>
+            Boutiques En Attente
+          </NavLink>
+          <NavLink to="/moderator/products" className={linkClass}>
+            Produits En Attente
+          </NavLink>
+          <NavLink to="/dashboard/moderator" className={linkClass}>
+            Dashboard
+          </NavLink>
         </>}
 
+        {/* ADMIN */}
         {user?.role === 'admin' && <>
-          <Link to="/admin/users"      className="text-gray-600 hover:text-blue-600">Utilisateurs</Link>
-          <Link to="/dashboard/admin"  className="text-gray-600 hover:text-blue-600">Dashboard</Link>
+          <NavLink to="/admin/users" className={linkClass}>
+            Utilisateurs
+          </NavLink>
+          <NavLink to="/dashboard/admin" className={linkClass}>
+            Dashboard
+          </NavLink>
         </>}
 
+        {/* AUTH */}
         {user ? (
           <button
             onClick={logout}
@@ -41,28 +84,32 @@ export default function Navbar() {
           </button>
         ) : (
           <div className="flex gap-2">
-            <Link to="/login"    className="text-gray-600 hover:text-blue-600">Connexion</Link>
-            <Link to="/register" className="bg-blue-600 text-white px-4 py-1 rounded-lg hover:bg-blue-700">
+            <NavLink to="/login" className={linkClass}>
+              Connexion
+            </NavLink>
+            <NavLink to="/register" className={linkClass}>
               Inscription
-            </Link>
+            </NavLink>
           </div>
         )}
-      {user && (
-  <Link to="/profile" className="text-gray-600 hover:text-blue-600">
-    {/* Avatar miniature */}
-    {user.avatar_url ? (
-      <img
-        src={user.avatar_url}
-        alt="avatar"
-        className="w-8 h-8 rounded-full object-cover inline"
-      />
-    ) : (
-      <span className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold inline-flex items-center justify-center">
-        {user.username?.[0]?.toUpperCase()}
-      </span>
-    )}
-  </Link>
-  )}
+
+        {/* PROFILE */}
+        {user && (
+          <NavLink to="/profile" className="flex items-center">
+            {user.avatar_url ? (
+              <img
+                src={user.avatar_url}
+                alt="avatar"
+                className="w-8 h-8 rounded-full object-cover"
+              />
+            ) : (
+              <span className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold flex items-center justify-center">
+                {user.username?.[0]?.toUpperCase()}
+              </span>
+            )}
+          </NavLink>
+        )}
+
       </div>
     </nav>
   )
