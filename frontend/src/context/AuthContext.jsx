@@ -8,34 +8,36 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
 
   // Récupère l'user connecté au démarrage
-  useEffect(() => {
-    const token = localStorage.getItem('access_token')
-    if (token) {
-      api.get('/auth/me/')
-        .then(({ data }) => setUser(data))
-        .catch(() => localStorage.clear())
-        .finally(() => setLoading(false))
-    } else {
-      setLoading(false)
-    }
-  }, [])
-
-  const login = async (username, password) => {
-    const { data } = await api.post('/auth/login/', { username, password })
-    localStorage.setItem('access_token',  data.access)
-    localStorage.setItem('refresh_token', data.refresh)
-    const me = await api.get('/auth/me/')
-    setUser(me.data)
-    return me.data
+ useEffect(() => {
+  const token = localStorage.getItem('access_token')
+  if (token) {
+    api.get('/auth/me/')
+      .then(({ data }) => setUser(data))  // ← avatar_url sera dans data ✅
+      .catch(() => localStorage.clear())
+      .finally(() => setLoading(false))
+  } else {
+    setLoading(false)
   }
+}, [])
 
+const login = async (username, password) => {
+  const { data } = await api.post('/auth/login/', { username, password })
+  localStorage.setItem('access_token',  data.access)
+  localStorage.setItem('refresh_token', data.refresh)
+  const me = await api.get('/auth/me/')
+  setUser(me.data)  // ← avatar_url sera dans me.data ✅
+  return me.data
+}
   const logout = () => {
     localStorage.clear()
     setUser(null)
   }
+  const updateUser = (userData) => {
+  setUser(userData)
+}
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, loading, updateUser }}>
       {children}
     </AuthContext.Provider>
   )

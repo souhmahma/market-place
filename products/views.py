@@ -3,14 +3,18 @@ from .models import Product, Category
 from .serializers import ProductSerializer, CategorySerializer, ProductStatusSerializer
 from accounts.permissions import IsVendor, IsModerator
 from orders.tasks import send_product_approved_email, send_low_stock_alert
+from orders.tasks import send_moderator_new_product_email, send_product_rejected_email
+
 class ProductCreateView(generics.CreateAPIView):
-    """Vendeur ajoute un produit à sa boutique"""
     serializer_class   = ProductSerializer
     permission_classes = [IsVendor]
 
     def perform_create(self, serializer):
-        # On assigne automatiquement la boutique du vendeur connecté
-        serializer.save(shop=self.request.user.shop)
+        product = serializer.save(shop=self.request.user.shop)
+        send_moderator_new_product_email.delay(product.id)
+
+    def get_serializer_context(self):
+        return {'request': self.request}
 
 class ProductListView(generics.ListAPIView):
     """Tout le monde voit les produits approuvés"""
@@ -39,6 +43,8 @@ class ProductModerationView(generics.UpdateAPIView):
         # Envoyer email + vérifier stock
         if product.status == 'approved':
             send_product_approved_email.delay(product.id)
+        if product.status == 'rejected':
+            send_product_rejected_email.delay(product.id)
         if product.stock < 5:
             send_low_stock_alert.delay(product.id)
 

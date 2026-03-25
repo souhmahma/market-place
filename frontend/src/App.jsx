@@ -18,7 +18,7 @@ import AdminUsers       from './pages/admin/AdminUsers'
 import Profile from './pages/Profile'
 import Success from './pages/Success'
 import Cancel  from './pages/Cancel'
-
+import ProductDetail from './pages/ProductDetail'
 export default function App() {
   return (
     <AuthProvider>
@@ -88,6 +88,7 @@ export default function App() {
               <AdminUsers />
             </ProtectedRoute>
           } />
+<Route path="/products/:id" element={<ProductDetail />} />
 
 <Route path="/profile" element={
   <ProtectedRoute>

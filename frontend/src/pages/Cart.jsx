@@ -56,22 +56,34 @@ export default function Cart() {
 
       <div className="space-y-4 mb-8">
         {cart.cart_items.map((item) => (
-          <div key={item.id} className="bg-white rounded-xl shadow p-4 flex items-center justify-between">
-            <div>
-              <p className="font-semibold">{item.product_name}</p>
-              <p className="text-gray-500 text-sm">Quantité : {item.quantity}</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="font-bold text-blue-600">{item.subtotal}€</span>
-              <button
-                onClick={() => handleRemove(item.id)}
-                className="text-red-400 hover:text-red-600 text-sm"
-              >
-                Supprimer
-              </button>
-            </div>
-          </div>
-        ))}
+  <div key={item.id} className="bg-white rounded-xl shadow p-4 flex items-center gap-4">
+    {/* Image produit */}
+    {item.product_image ? (
+      <img
+        src={item.product_image}
+        alt={item.product_name}
+        className="w-16 h-16 rounded-lg object-cover"
+      />
+    ) : (
+      <div className="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center text-2xl">
+        📦
+      </div>
+    )}
+    <div className="flex-1">
+      <p className="font-semibold">{item.product_name}</p>
+      <p className="text-gray-500 text-sm">Quantité : {item.quantity}</p>
+    </div>
+    <div className="flex items-center gap-4">
+      <span className="font-bold text-blue-600">{item.subtotal}€</span>
+      <button
+        onClick={() => handleRemove(item.id)}
+        className="text-red-400 hover:text-red-600 text-sm"
+      >
+        Supprimer
+      </button>
+    </div>
+  </div>
+))}
       </div>
 
       {/* Total */}
