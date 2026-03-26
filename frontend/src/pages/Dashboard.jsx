@@ -21,16 +21,16 @@ export default function Dashboard() {
 
   // Dashboard Vendeur
   if (user.role === 'vendor') return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Ma Boutique — {stats.shop}</h1>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatCard label="Commandes"  value={stats.stats.total_orders} />
-        <StatCard label="Revenus"    value={`${stats.stats.total_revenue}€`} />
-        <StatCard label="Produits"   value={stats.stats.total_products} />
-        <StatCard label="En attente" value={stats.stats.pending_products} />
-      </div>
+  <div className="max-w-6xl mx-auto px-4 py-8">
+    <h1 className="text-3xl font-bold mb-8">Ma Boutique — {stats.shop}</h1>
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <StatCard label="Commandes"           value={stats.stats.total_orders} />
+      <StatCard label="Revenus"             value={`${stats.stats.total_revenue}€`} />
+      <StatCard label="Produits approuvés"  value={stats.stats.approved_products} color="green" />
+      <StatCard label="Produits en attente" value={stats.stats.pending_products}  color="yellow" />
     </div>
-  )
+  </div>
+)
 
   // Dashboard Admin
   if (user.role === 'admin') return (

@@ -68,19 +68,18 @@ class CartItemDeleteView(APIView):
         return Response({"message": "Article supprimé"})
 
 class CheckoutView(APIView):
-    """Créer une session Stripe et une commande"""
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
+        if request.user.role != 'customer':
+            return Response({"error": "Accès refusé"}, status=403)
+
         cart = Cart.objects.filter(customer=request.user).first()
-
         if not cart or not cart.cart_items.exists():
-            return Response({"error": "Panier vide"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Panier vide"}, status=400)
 
-        # Créer la commande
         order = Order.objects.create(customer=request.user)
 
-        # Créer les OrderItems depuis le panier
         line_items = []
         for cart_item in cart.cart_items.all():
             OrderItem.objects.create(
@@ -91,31 +90,30 @@ class CheckoutView(APIView):
             )
             line_items.append({
                 'price_data': {
-                    'currency': 'eur',
+                    'currency'    : 'eur',
                     'product_data': {'name': cart_item.product.name},
-                    'unit_amount': int(cart_item.product.price * 100),  # Stripe = centimes
+                    'unit_amount' : int(cart_item.product.price * 100),
                 },
                 'quantity': cart_item.quantity,
             })
 
-        # Calculer les totaux
         order.calculate_totals()
-        # Créer la session Stripe
+
         session = stripe.checkout.Session.create(
-            payment_method_types=['card'],
-            line_items=line_items,
-            mode='payment',
-            success_url='http://localhost:5173/success?session_id={CHECKOUT_SESSION_ID}',
-            cancel_url='http://localhost:5173/cancel',
-            metadata={'order_id': order.id}
+            payment_method_types = ['card'],
+            line_items           = line_items,
+            mode                 = 'payment',
+            success_url          = 'http://localhost:5173/success?session_id={CHECKOUT_SESSION_ID}',
+            cancel_url           = 'http://localhost:5173/cancel',  # ← panier conservé
+            metadata             = {'order_id': order.id}
         )
 
-        # Vider le panier
-        cart.cart_items.all().delete()
+        # 🆕 NE PAS vider le panier ici — seulement dans le webhook après paiement confirmé
+        # cart.cart_items.all().delete()  ← supprimer cette ligne
 
         return Response({
             'checkout_url': session.url,
-            'order_id': order.id
+            'order_id'    : order.id
         })
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -145,28 +143,42 @@ class StripeWebhookView(APIView):
             if not order_id:
                 return Response(status=400)
 
-            order = Order.objects.get(id=order_id)
-            order.status            = Order.Status.PAID
-            order.stripe_payment_id = session.get('payment_intent', '')
-            order.save()
+            try:
+                order                   = Order.objects.get(id=int(order_id))
+                order.status            = Order.Status.PAID
+                order.stripe_payment_id = session.get('payment_intent', '')
+                order.save()
 
-            # 🆕 Mettre à jour le stock de chaque produit
-            for item in order.items.all():
-                product = item.product
-                product.stock = max(0, product.stock - item.quantity)
-                product.save()
+                # Mettre à jour le stock
+                for item in order.items.all():
+                    product       = item.product
+                    product.stock = max(0, product.stock - item.quantity)
+                    product.save()
 
-            send_order_confirmation_email.delay(int(order_id))
+                # 🆕 Vider le panier seulement après paiement confirmé
+                try:
+                    cart = order.customer.cart
+                    cart.cart_items.all().delete()
+                except Exception:
+                    pass
+
+                send_order_confirmation_email.delay(order.id)
+
+            except Order.DoesNotExist:
+                return Response(status=404)
 
         return Response({"status": "ok"})
 
 class OrderListView(generics.ListAPIView):
-    """Customer voit ses propres commandes"""
+    """Customer voit seulement ses commandes payées"""
     serializer_class   = OrderSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Order.objects.filter(customer=self.request.user)
+        return Order.objects.filter(
+            customer = self.request.user,
+            status   = Order.Status.PAID  # ← seulement les payées
+        ).order_by('-created_at')
 
 class OrderDetailView(generics.RetrieveAPIView):
     """Détail d'une commande"""
