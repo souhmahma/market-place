@@ -9,43 +9,37 @@ from shops.models import Shop
 from accounts.models import User
 
 class VendorDashboardView(APIView):
-    """Stats pour le vendeur connecté"""
     permission_classes = [IsVendor]
 
     def get(self, request):
         shop = request.user.shop
 
-        # Commandes liées aux produits de la boutique
         orders = Order.objects.filter(
-            items__product__shop=shop,
-            status='paid'
+            items__product__shop = shop,
+            status               = 'paid'
         ).distinct()
 
-        # Revenus par mois
         monthly_revenue = orders.annotate(
             month=TruncMonth('created_at')
         ).values('month').annotate(
             revenue=Sum('total_amount')
         ).order_by('month')
 
-        # Produits les plus vendus
         top_products = OrderItem.objects.filter(
             product__shop=shop
-        ).values(
-            'product__name'
-        ).annotate(
-            total_sold=Sum('quantity'),
-            total_revenue=Sum('price')
+        ).values('product__name').annotate(
+            total_sold    = Sum('quantity'),
+            total_revenue = Sum('price')
         ).order_by('-total_sold')[:5]
 
-        # Stats générales
         stats = {
-            'total_orders'   : orders.count(),
-            'total_revenue'  : orders.aggregate(Sum('total_amount'))['total_amount__sum'] or 0,
-            'total_products' : shop.products.count(),
-            'pending_products': shop.products.filter(status='pending').count(),
-            'approved_products': shop.products.filter(status='approved').count(),
-            'avg_order_value': orders.aggregate(Avg('total_amount'))['total_amount__avg'] or 0,
+            'total_orders'      : orders.count(),
+            'total_revenue'     : orders.aggregate(Sum('total_amount'))['total_amount__sum'] or 0,
+            'total_products'    : shop.products.count(),
+            'approved_products' : shop.products.filter(status='approved').count(),  # 🆕
+            'pending_products'  : shop.products.filter(status='pending').count(),   # 🆕
+            'rejected_products' : shop.products.filter(status='rejected').count(),  # 🆕
+            'avg_order_value'   : orders.aggregate(Avg('total_amount'))['total_amount__avg'] or 0,
         }
 
         return Response({
