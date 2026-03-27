@@ -275,41 +275,6 @@ stripe listen --forward-to localhost:8000/api/orders/webhook/
 
 ## 🚀 Mise en production
 
-### Variables d'environnement
-
-```bash
-DEBUG=False
-SECRET_KEY=une_clé_secrète_longue_et_aléatoire
-ALLOWED_HOSTS=ton-domaine.com
-
-# PostgreSQL — remplace SQLite en production
-DATABASE_URL=postgresql://user:password@host:5432/dbname
-
-# Redis Cloud
-REDIS_URL=redis://default:password@host:port
-
-# Stripe (clés Live, pas Test)
-STRIPE_SECRET_KEY=sk_live_...
-STRIPE_WEBHOOK_SECRET=whsec_...
-COMMISSION_RATE=0.10
-
-# Email
-EMAIL_HOST_USER=noreply@ton-domaine.com
-EMAIL_HOST_PASSWORD=app_password
-```
-
-### Passer à PostgreSQL
-
-```bash
-pip install psycopg2-binary dj-database-url
-```
-
-### Fichiers statiques
-
-```bash
-pip install whitenoise
-python manage.py collectstatic
-```
 
 ### Déploiement recommandé
 
@@ -319,6 +284,7 @@ python manage.py collectstatic
 | **Vercel** | Frontend React |
 | **Upstash** | Redis Cloud |
 | **Cloudinary** | Stockage des images |
+| **PostgreSQL** | Base de données | 
 
 
 ```
