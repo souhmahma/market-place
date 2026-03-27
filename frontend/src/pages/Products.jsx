@@ -49,7 +49,7 @@ export default function Products() {
           className="border rounded-lg px-4 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3  gap-6">
         {filtered.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}

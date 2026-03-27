@@ -193,3 +193,4 @@ class AdminOrderListView(generics.ListAPIView):
     serializer_class   = OrderSerializer
     permission_classes = [IsAdmin]
     queryset           = Order.objects.all()
+    
