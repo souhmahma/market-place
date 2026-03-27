@@ -38,7 +38,7 @@ export default function Dashboard() {
       <h1 className="text-3xl font-bold mb-8">Dashboard Admin</h1>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatCard label="Utilisateurs"  value={stats.user_stats.total_users} />
-        <StatCard label="Commandes"     value={stats.order_stats.total_orders} />
+        <StatCard label="Commandes"     value={stats.order_stats.paid_orders} />
         <StatCard label="Revenus"       value={`${stats.order_stats.total_revenue}€`} />
         <StatCard label="Commissions"   value={`${stats.order_stats.total_commission}€`} />
       </div>
