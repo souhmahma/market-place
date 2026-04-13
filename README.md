@@ -288,7 +288,7 @@ stripe listen --forward-to localhost:8000/api/orders/webhook/
 
 ## 👤 Author
 
-**Souhail HMAHMA** — Python Developer
+**Souhail HMAHMA** — Full Stack Developer
 
 🌐 [souhail3.vercel.app](https://souhail3.vercel.app) · 💼 [LinkedIn](https://linkedin.com/in/souhail-hmahma) · 🐙 [GitHub](https://github.com/souhmahma)
 
