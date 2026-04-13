@@ -1,4 +1,4 @@
-# Marketplace: Plateforme E-commerce Multi-Vendeurs
+# Marketplace : Plateforme E-commerce Multi-Vendeurs
 
 Une plateforme marketplace fullstack permettant à des vendeurs de créer leurs boutiques, proposer des produits, et recevoir des paiements en ligne.
 
