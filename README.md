@@ -251,11 +251,28 @@ CVC    : 123
 ---
 
 ## ⚙️ Installation
+Crée ce fichier à la racine de ton dossier backend/
+```bash
+# --- STRIPE (Paiements) ---
+STRIPE_SECRET_KEY=sk_test_ton_code_secret
+STRIPE_WEBHOOK_SECRET=whsec_ton_code_webhook
+COMMISSION_RATE=0.10
 
+# --- REDIS / CELERY ---
+REDIS_URL=redis://127.0.0.1:6379/0
+
+# --- CONFIGURATION EMAIL (SMTP) ---
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_HOST_USER=ton-adresse@gmail.com
+EMAIL_HOST_PASSWORD=ton-mot-de-passe-application-google
+```
+Après:
 ```bash
 # Backend
 python -m venv venv
 .\venv\Scripts\Activate
+cd backend
 pip install -r requirements.txt
 python manage.py runserver
 
