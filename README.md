@@ -251,7 +251,7 @@ CVC    : 123
 ---
 
 ## ⚙️ Installation
-Crée ce fichier à la racine de ton dossier backend/
+Crée .env à la racine de ton dossier backend/
 ```bash
 # --- STRIPE (Paiements) ---
 STRIPE_SECRET_KEY=sk_test_ton_code_secret
