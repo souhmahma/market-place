@@ -1,5 +1,7 @@
 # Marketplace : Plateforme E-commerce Multi-Vendeurs
- 
+
+[![Marketplace CI](https://github.com/souhmahma/market-place/actions/workflows/main.yml/badge.svg)](https://github.com/souhmahma/market-place/actions/workflows/main.yml)
+
 Une plateforme marketplace fullstack permettant à des vendeurs de créer leurs boutiques, proposer des produits, et recevoir des paiements en ligne.
 
 > **Stack** : Django REST Framework · Tailwind CSS · React · Redis · Stripe · Celery · Auth JWT 
