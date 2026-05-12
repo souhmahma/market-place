@@ -1,0 +1,32 @@
+name: Marketplace CI
+
+on: [push]
+
+env:
+  DEBUG: "True"
+  SECRET_KEY: "ci-mock-key"
+  DATABASE_URL: "sqlite:///./db.sqlite3"
+  ALLOWED_HOSTS: "*"
+  REDIS_URL: "redis://localhost:6379/0"
+  CELERY_TASK_ALWAYS_EAGER: "True"
+  STRIPE_SECRET_KEY: "sk_test_mock"
+  EMAIL_BACKEND: "django.core.mail.backends.console.EmailBackend"
+  EMAIL_HOST_USER: "mock"
+  EMAIL_HOST_PASSWORD: "mock"
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build with Docker Compose
+        run: docker compose build
+
+      - name: Verify Services
+        run: |
+          docker compose up -d
+          sleep 15
+          curl -f http://localhost:8000/api/products/ || (docker compose logs backend && exit 1)
+          curl -f http://localhost:80 || (docker compose logs frontend && exit 1)
+          docker compose down
