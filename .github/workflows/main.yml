@@ -12,8 +12,12 @@ env:
   STRIPE_SECRET_KEY: "sk_test_mock"
   STRIPE_WEBHOOK_SECRET: "whsec_mock_secret"
   EMAIL_BACKEND: "django.core.mail.backends.console.EmailBackend"
-  EMAIL_HOST_USER: "mock"
-  EMAIL_HOST_PASSWORD: "mock"
+  EMAIL_HOST: "localhost"
+  EMAIL_PORT: "1025"
+  EMAIL_USE_TLS: "False"
+  EMAIL_HOST_USER: "mock-user"
+  EMAIL_HOST_PASSWORD: "mock-password"
+  DEFAULT_FROM_EMAIL: "noreply@marketplace-test.com"
 
 jobs:
   verify:
