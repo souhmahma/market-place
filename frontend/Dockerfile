@@ -5,11 +5,9 @@ COPY frontend/package*.json ./
 RUN npm install
 
 COPY frontend/ .
-
 RUN npm run build
 
 FROM nginx:stable-alpine
-
 COPY --from=build-stage /app/dist /usr/share/nginx/html
 
 RUN printf "server { \n\
